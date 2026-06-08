@@ -4,6 +4,7 @@ import Hero from './components/Hero'
 import SkillForm from './components/SkillForm'
 import JobList from './components/JobList'
 import ApplicationsTracker from './components/ApplicationsTracker'
+import Dashboard from './components/Dashboard'
 import type { ApplicationStatus, Job, SavedJob } from './types/job'
 import { getFromLocalStorage, saveToLocalStorage } from './utils/localStorage'
 
@@ -100,6 +101,8 @@ function App() {
         onAddSkill={handleAddSkill}
         onRemoveSkill={handleRemoveSkill}
       />
+
+      <Dashboard skills={skills} savedJobs={savedJobs} />
 
       <JobList
         userSkills={skills}
