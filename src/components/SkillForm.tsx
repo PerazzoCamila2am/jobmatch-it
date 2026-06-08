@@ -1,13 +1,13 @@
 import { useState } from 'react'
 
-function SkillForm() {
+type SkillFormProps = {
+  skills: string[]
+  onAddSkill: (skill: string) => void
+  onRemoveSkill: (skill: string) => void
+}
+
+function SkillForm({ skills, onAddSkill, onRemoveSkill }: SkillFormProps) {
   const [skillInput, setSkillInput] = useState('')
-  const [skills, setSkills] = useState<string[]>([
-    'HTML',
-    'CSS',
-    'JavaScript',
-    'Git',
-  ])
 
   const handleAddSkill = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -18,23 +18,8 @@ function SkillForm() {
       return
     }
 
-    const skillAlreadyExists = skills.some(
-      (skill) => skill.toLowerCase() === newSkill.toLowerCase(),
-    )
-
-    if (skillAlreadyExists) {
-      setSkillInput('')
-      return
-    }
-
-    setSkills([...skills, newSkill])
+    onAddSkill(newSkill)
     setSkillInput('')
-  }
-
-  const handleRemoveSkill = (skillToRemove: string) => {
-    const updatedSkills = skills.filter((skill) => skill !== skillToRemove)
-
-    setSkills(updatedSkills)
   }
 
   return (
@@ -50,8 +35,8 @@ function SkillForm() {
           </h3>
 
           <p className="mt-2 text-slate-400">
-            Estas habilidades se van a comparar después con los requisitos de
-            cada oferta laboral.
+            Estas habilidades se comparan con los requisitos de cada oferta
+            laboral.
           </p>
         </div>
 
@@ -92,7 +77,7 @@ function SkillForm() {
 
                   <button
                     type="button"
-                    onClick={() => handleRemoveSkill(skill)}
+                    onClick={() => onRemoveSkill(skill)}
                     className="text-slate-500 transition hover:text-red-400"
                     aria-label={`Eliminar ${skill}`}
                   >
