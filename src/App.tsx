@@ -1,20 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import SkillForm from './components/SkillForm'
 import JobList from './components/JobList'
 import ApplicationsTracker from './components/ApplicationsTracker'
 import type { ApplicationStatus, Job, SavedJob } from './types/job'
+import { getFromLocalStorage, saveToLocalStorage } from './utils/localStorage'
+
+const SKILLS_STORAGE_KEY = 'jobmatch-it-skills'
+const SAVED_JOBS_STORAGE_KEY = 'jobmatch-it-saved-jobs'
 
 function App() {
-  const [skills, setSkills] = useState<string[]>([
-    'HTML',
-    'CSS',
-    'JavaScript',
-    'Git',
-  ])
+  const [skills, setSkills] = useState<string[]>(() =>
+    getFromLocalStorage<string[]>(SKILLS_STORAGE_KEY, [
+      'HTML',
+      'CSS',
+      'JavaScript',
+      'Git',
+    ]),
+  )
 
-  const [savedJobs, setSavedJobs] = useState<SavedJob[]>([])
+  const [savedJobs, setSavedJobs] = useState<SavedJob[]>(() =>
+    getFromLocalStorage<SavedJob[]>(SAVED_JOBS_STORAGE_KEY, []),
+  )
+
+  useEffect(() => {
+    saveToLocalStorage(SKILLS_STORAGE_KEY, skills)
+  }, [skills])
+
+  useEffect(() => {
+    saveToLocalStorage(SAVED_JOBS_STORAGE_KEY, savedJobs)
+  }, [savedJobs])
 
   const handleAddSkill = (newSkill: string) => {
     const skillAlreadyExists = skills.some(
