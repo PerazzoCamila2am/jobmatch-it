@@ -5,9 +5,11 @@ import MatchBadge from './MatchBadge'
 type JobCardProps = {
   job: Job
   userSkills: string[]
+  isSaved: boolean
+  onSaveJob: (job: Job) => void
 }
 
-function JobCard({ job, userSkills }: JobCardProps) {
+function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
   const { score, matchedSkills, missingSkills } = calculateMatchScore(
     userSkills,
     job.requiredSkills,
@@ -65,7 +67,9 @@ function JobCard({ job, userSkills }: JobCardProps) {
           </p>
 
           {matchedSkills.length === 0 ? (
-            <p className="text-sm text-slate-500">Todavía no hay coincidencias.</p>
+            <p className="text-sm text-slate-500">
+              Todavía no hay coincidencias.
+            </p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {matchedSkills.map((skill) => (
@@ -102,6 +106,21 @@ function JobCard({ job, userSkills }: JobCardProps) {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="mt-6 flex justify-end">
+        <button
+          type="button"
+          onClick={() => onSaveJob(job)}
+          disabled={isSaved}
+          className={`rounded-xl px-5 py-2 text-sm font-semibold transition ${
+            isSaved
+              ? 'cursor-not-allowed border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+              : 'bg-blue-500 text-white hover:bg-blue-600'
+          }`}
+        >
+          {isSaved ? 'Oferta guardada' : 'Guardar oferta'}
+        </button>
       </div>
     </article>
   )

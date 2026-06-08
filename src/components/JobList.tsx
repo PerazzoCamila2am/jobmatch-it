@@ -1,13 +1,16 @@
 import { useMemo, useState } from 'react'
 import { mockJobs } from '../data/mockJobs'
+import type { Job, SavedJob } from '../types/job'
 import JobCard from './JobCard'
 import JobFilters from './JobFilters'
 
 type JobListProps = {
   userSkills: string[]
+  savedJobs: SavedJob[]
+  onSaveJob: (job: Job) => void
 }
 
-function JobList({ userSkills }: JobListProps) {
+function JobList({ userSkills, savedJobs, onSaveJob }: JobListProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedLevel, setSelectedLevel] = useState('')
   const [selectedModality, setSelectedModality] = useState('')
@@ -23,8 +26,7 @@ function JobList({ userSkills }: JobListProps) {
         job.company.toLowerCase().includes(searchValue) ||
         job.description.toLowerCase().includes(searchValue)
 
-      const matchesLevel =
-        selectedLevel === '' || job.level === selectedLevel
+      const matchesLevel = selectedLevel === '' || job.level === selectedLevel
 
       const matchesModality =
         selectedModality === '' || job.modality === selectedModality
@@ -58,7 +60,8 @@ function JobList({ userSkills }: JobListProps) {
         </h2>
 
         <p className="mt-2 text-slate-400">
-          Filtrá empleos y analizá qué tan compatibles son con tus habilidades.
+          Filtrá empleos, analizá compatibilidad y guardá oportunidades para
+          hacer seguimiento.
         </p>
       </div>
 
@@ -93,9 +96,19 @@ function JobList({ userSkills }: JobListProps) {
         </div>
       ) : (
         <div className="grid gap-6">
-          {filteredJobs.map((job) => (
-            <JobCard key={job.id} job={job} userSkills={userSkills} />
-          ))}
+          {filteredJobs.map((job) => {
+            const isSaved = savedJobs.some((savedJob) => savedJob.id === job.id)
+
+            return (
+              <JobCard
+                key={job.id}
+                job={job}
+                userSkills={userSkills}
+                isSaved={isSaved}
+                onSaveJob={onSaveJob}
+              />
+            )
+          })}
         </div>
       )}
     </section>

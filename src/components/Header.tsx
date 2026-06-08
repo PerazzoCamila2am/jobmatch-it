@@ -1,6 +1,6 @@
 function Header() {
   return (
-    <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <div>
           <h1 className="text-xl font-bold text-white">JobMatch IT</h1>
@@ -16,8 +16,8 @@ function Header() {
           <a href="#jobs" className="transition hover:text-white">
             Empleos
           </a>
-          <a href="#analysis" className="transition hover:text-white">
-            Análisis
+          <a href="#applications" className="transition hover:text-white">
+            Postulaciones
           </a>
         </nav>
       </div>
