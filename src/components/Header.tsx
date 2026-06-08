@@ -18,6 +18,10 @@ function Header() {
                 Dashboard
             </a>
 
+            <a href="#skill-analyzer" className="transition hover:text-white">
+                Analizador
+            </a>
+
             <a href="#jobs" className="transition hover:text-white">
                 Empleos
             </a>

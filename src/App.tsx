@@ -5,6 +5,7 @@ import SkillForm from './components/SkillForm'
 import JobList from './components/JobList'
 import ApplicationsTracker from './components/ApplicationsTracker'
 import Dashboard from './components/Dashboard'
+import DetectedSkillsAnalyzer from './components/DetectedSkillsAnalyzer'
 import type { ApplicationStatus, Job, SavedJob } from './types/job'
 import { getFromLocalStorage, saveToLocalStorage } from './utils/localStorage'
 
@@ -103,6 +104,8 @@ function App() {
       />
 
       <Dashboard skills={skills} savedJobs={savedJobs} />
+
+      <DetectedSkillsAnalyzer />
 
       <JobList
         userSkills={skills}
