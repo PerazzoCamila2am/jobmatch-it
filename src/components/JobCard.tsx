@@ -13,10 +13,8 @@ type JobCardProps = {
 function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
   const finalRequiredSkills = getJobSkills(job.requiredSkills, job.description)
 
-  const { score, matchedSkills, missingSkills } = calculateMatchScore(
-  userSkills,
-  finalRequiredSkills,
-)
+  const { score, matchedSkills, missingSkills, recommendation } =
+    calculateMatchScore(userSkills, finalRequiredSkills)
 
   return (
     <article className="rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-black/20">
@@ -48,11 +46,11 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
 
       <div className="mt-6">
         <p className="mb-3 text-sm font-semibold text-slate-200">
-          Tecnologías requeridas:
+          Tecnologías detectadas/requeridas:
         </p>
 
         <div className="flex flex-wrap gap-2">
-         {finalRequiredSkills.map((skill) => (
+          {finalRequiredSkills.map((skill) => (
             <span
               key={skill}
               className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-xs text-slate-300"
@@ -111,6 +109,16 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
         </div>
       </div>
 
+      <div className="mt-6 rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4">
+        <p className="text-sm font-semibold text-blue-300">
+          Recomendación automática:
+        </p>
+
+        <p className="mt-2 text-sm leading-6 text-slate-300">
+          {recommendation}
+        </p>
+      </div>
+
       <div className="mt-6 flex justify-end">
         <button
           type="button"
@@ -126,13 +134,9 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
         </button>
       </div>
 
-            {(job.url || job.source) && (
+      {(job.url || job.source) && (
         <div className="mt-5 border-t border-slate-800 pt-4 text-sm text-slate-400">
-          {job.source && (
-            <span>
-              Fuente: {job.source}
-            </span>
-          )}
+          {job.source && <span>Fuente: {job.source}</span>}
 
           {job.url && (
             <a
