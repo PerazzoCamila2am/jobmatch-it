@@ -32,7 +32,7 @@ function Hero() {
         </div>
       </div>
 
-      <div className="rounded-[2rem] border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-black/30">
+      <div className="rounded-4x1 border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-black/30">
         <div className="rounded-2xl border border-slate-800 bg-slate-950 p-5">
           <p className="text-sm text-slate-500">Match estimado</p>
 

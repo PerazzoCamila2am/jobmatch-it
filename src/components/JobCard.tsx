@@ -16,140 +16,194 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
   const { score, matchedSkills, missingSkills, recommendation } =
     calculateMatchScore(userSkills, finalRequiredSkills)
 
+  const visibleSkills = finalRequiredSkills.slice(0, 8)
+  const hiddenSkillsCount = finalRequiredSkills.length - visibleSkills.length
+
   return (
-    <article className="rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-black/20">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h3 className="text-xl font-bold text-white">{job.title}</h3>
+    <article className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/85 shadow-xl shadow-black/20 transition hover:border-slate-700">
+      <div className="border-b border-slate-800 p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <div className="mb-3 flex flex-wrap gap-2">
+              <span className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-xs font-medium text-slate-300">
+                {job.level}
+              </span>
 
-          <p className="mt-1 text-sm text-slate-400">
-            {job.company} · {job.location}
-          </p>
+              <span className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-xs font-medium text-slate-300">
+                {job.modality}
+              </span>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            <span className="rounded-full bg-slate-950 px-3 py-1 text-xs text-slate-300">
-              {job.level}
-            </span>
+              {job.source && (
+                <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
+                  {job.source}
+                </span>
+              )}
+            </div>
 
-            <span className="rounded-full bg-slate-950 px-3 py-1 text-xs text-slate-300">
-              {job.modality}
-            </span>
+            <h3 className="text-xl font-bold leading-snug text-white">
+              {job.title}
+            </h3>
+
+            <p className="mt-2 text-sm text-slate-400">
+              {job.company} · {job.location}
+            </p>
+          </div>
+
+          <div className="shrink-0">
+            <MatchBadge score={score} />
           </div>
         </div>
 
-        <MatchBadge score={score} />
-      </div>
-
-      <p className="mt-5 text-sm leading-6 text-slate-300">
-        {job.description}
-      </p>
-
-      <div className="mt-6">
-        <p className="mb-3 text-sm font-semibold text-slate-200">
-          Tecnologías detectadas/requeridas:
+        <p className="mt-5 line-clamp-3 text-sm leading-6 text-slate-400">
+          {job.description}
         </p>
-
-        <div className="flex flex-wrap gap-2">
-          {finalRequiredSkills.map((skill) => (
-            <span
-              key={skill}
-              className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-xs text-slate-300"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-          <p className="mb-3 text-sm font-semibold text-emerald-300">
-            Ya cumplís:
+      <div className="space-y-5 p-6">
+        <div>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="text-sm font-semibold text-slate-200">
+              Tecnologías detectadas
+            </p>
+
+            <p className="text-xs text-slate-500">
+              {finalRequiredSkills.length} skill
+              {finalRequiredSkills.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {visibleSkills.map((skill) => (
+              <span
+                key={skill}
+                className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-xs text-slate-300"
+              >
+                {skill}
+              </span>
+            ))}
+
+            {hiddenSkillsCount > 0 && (
+              <span className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-xs text-slate-500">
+                +{hiddenSkillsCount} más
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/5 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-semibold text-emerald-300">
+                Coincidencias
+              </p>
+
+              <span className="text-xs text-emerald-300/70">
+                {matchedSkills.length}
+              </span>
+            </div>
+
+            {matchedSkills.length === 0 ? (
+              <p className="text-sm text-slate-500">
+                No hay coincidencias todavía.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {matchedSkills.slice(0, 6).map((skill) => (
+                  <span
+                    key={skill}
+                    className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200"
+                  >
+                    {skill}
+                  </span>
+                ))}
+
+                {matchedSkills.length > 6 && (
+                  <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200/70">
+                    +{matchedSkills.length - 6}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-semibold text-red-300">
+                A reforzar
+              </p>
+
+              <span className="text-xs text-red-300/70">
+                {missingSkills.length}
+              </span>
+            </div>
+
+            {missingSkills.length === 0 ? (
+              <p className="text-sm text-slate-400">
+                Cubrís todas las tecnologías detectadas.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {missingSkills.slice(0, 6).map((skill) => (
+                  <span
+                    key={skill}
+                    className="rounded-full bg-red-500/10 px-3 py-1 text-xs text-red-200"
+                  >
+                    {skill}
+                  </span>
+                ))}
+
+                {missingSkills.length > 6 && (
+                  <span className="rounded-full bg-red-500/10 px-3 py-1 text-xs text-red-200/70">
+                    +{missingSkills.length - 6}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-blue-500/15 bg-blue-500/5 p-4">
+          <p className="text-sm font-semibold text-blue-300">
+            Recomendación
           </p>
 
-          {matchedSkills.length === 0 ? (
-            <p className="text-sm text-slate-500">
-              Todavía no hay coincidencias.
-            </p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {matchedSkills.map((skill) => (
-                <span
-                  key={skill}
-                  className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
-          <p className="mb-3 text-sm font-semibold text-red-300">
-            Te faltaría reforzar:
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            {recommendation}
           </p>
-
-          {missingSkills.length === 0 ? (
-            <p className="text-sm text-slate-400">
-              Tenés todas las tecnologías pedidas.
-            </p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {missingSkills.map((skill) => (
-                <span
-                  key={skill}
-                  className="rounded-full bg-red-500/10 px-3 py-1 text-xs text-red-200"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
-      </div>
 
-      <div className="mt-6 rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4">
-        <p className="text-sm font-semibold text-blue-300">
-          Recomendación automática:
-        </p>
+        <div className="flex flex-col gap-3 border-t border-slate-800 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap gap-3">
+            {job.url && (
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white"
+              >
+                Ver oferta
+              </a>
+            )}
 
-        <p className="mt-2 text-sm leading-6 text-slate-300">
-          {recommendation}
-        </p>
-      </div>
-
-      <div className="mt-6 flex justify-end">
-        <button
-          type="button"
-          onClick={() => onSaveJob(job)}
-          disabled={isSaved}
-          className={`rounded-xl px-5 py-2 text-sm font-semibold transition ${
-            isSaved
-              ? 'cursor-not-allowed border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
-          }`}
-        >
-          {isSaved ? 'Oferta guardada' : 'Guardar oferta'}
-        </button>
-      </div>
-
-      {(job.url || job.source) && (
-        <div className="mt-5 border-t border-slate-800 pt-4 text-sm text-slate-400">
-          {job.source && <span>Fuente: {job.source}</span>}
-
-          {job.url && (
-            <a
-              href={job.url}
-              target="_blank"
-              rel="noreferrer"
-              className="ml-3 font-semibold text-blue-400 transition hover:text-blue-300"
+            <button
+              type="button"
+              onClick={() => onSaveJob(job)}
+              disabled={isSaved}
+              className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                isSaved
+                  ? 'cursor-not-allowed border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+              }`}
             >
-              Ver oferta original
-            </a>
-          )}
+              {isSaved ? 'Guardada' : 'Guardar'}
+            </button>
+          </div>
+
+          <p className="text-xs text-slate-500">
+            Match calculado según tu stack actual
+          </p>
         </div>
-      )}
+      </div>
     </article>
   )
 }
