@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
 import type { Job, SavedJob } from '../types/job'
+import { calculateOpportunityScore } from '../utils/opportunityScore'
 import { getJobSkills } from '../utils/skillDetector'
+import { calculateJobTrust } from '../utils/trustCalculator'
+import FeaturedOpportunity from './FeaturedOpportunity'
 import JobCard from './JobCard'
 import JobFilters from './JobFilters'
 
@@ -29,40 +32,73 @@ function JobList({
   const [selectedLevel, setSelectedLevel] = useState('')
   const [selectedModality, setSelectedModality] = useState('')
   const [selectedSkill, setSelectedSkill] = useState('')
+  const [selectedTrust, setSelectedTrust] = useState('')
 
   const filteredJobs = useMemo(() => {
-    return jobs.filter((job) => {
-      const searchValue = searchTerm.toLowerCase().trim()
+    return jobs
+      .filter((job) => {
+        const searchValue = searchTerm.toLowerCase().trim()
 
-      const matchesSearch =
-        searchValue === '' ||
-        job.title.toLowerCase().includes(searchValue) ||
-        job.company.toLowerCase().includes(searchValue) ||
-        job.description.toLowerCase().includes(searchValue)
+        const matchesSearch =
+          searchValue === '' ||
+          job.title.toLowerCase().includes(searchValue) ||
+          job.company.toLowerCase().includes(searchValue) ||
+          job.description.toLowerCase().includes(searchValue)
 
-      const matchesLevel = selectedLevel === '' || job.level === selectedLevel
+        const matchesLevel = selectedLevel === '' || job.level === selectedLevel
 
-      const matchesModality =
-        selectedModality === '' || job.modality === selectedModality
+        const matchesModality =
+          selectedModality === '' || job.modality === selectedModality
 
-      const finalRequiredSkills = getJobSkills(job.requiredSkills, job.description)
-
-      const matchesSkill =
-        selectedSkill === '' ||
-        finalRequiredSkills.some(
-          (skill) => skill.toLowerCase() === selectedSkill.toLowerCase(),
+        const finalRequiredSkills = getJobSkills(
+          job.requiredSkills,
+          job.description,
         )
 
-      return matchesSearch && matchesLevel && matchesModality && matchesSkill
-    })
-  }, [jobs, searchTerm, selectedLevel, selectedModality, selectedSkill])
+        const matchesSkill =
+          selectedSkill === '' ||
+          finalRequiredSkills.some(
+            (skill) => skill.toLowerCase() === selectedSkill.toLowerCase(),
+          )
+
+        const trust = calculateJobTrust(job)
+
+        const matchesTrust =
+          selectedTrust === '' || trust.level === selectedTrust
+
+        return (
+          matchesSearch &&
+          matchesLevel &&
+          matchesModality &&
+          matchesSkill &&
+          matchesTrust
+        )
+      })
+      .sort((a, b) => {
+        const opportunityA = calculateOpportunityScore(a, userSkills)
+        const opportunityB = calculateOpportunityScore(b, userSkills)
+
+        return opportunityB.score - opportunityA.score
+      })
+  }, [
+    jobs,
+    userSkills,
+    searchTerm,
+    selectedLevel,
+    selectedModality,
+    selectedSkill,
+    selectedTrust,
+  ])
 
   const handleClearFilters = () => {
     setSearchTerm('')
     setSelectedLevel('')
     setSelectedModality('')
     setSelectedSkill('')
+    setSelectedTrust('')
   }
+
+  const savedJobIds = savedJobs.map((job) => job.id)
 
   return (
     <section id="jobs" className="mx-auto max-w-7xl px-6 py-10">
@@ -73,12 +109,12 @@ function JobList({
           </span>
 
           <h2 className="mt-4 text-3xl font-bold text-white">
-            Ofertas analizadas
+            Oportunidades priorizadas
           </h2>
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-            Explorá oportunidades remotas, filtrá por stack y guardá las que
-            quieras seguir de cerca.
+            Las ofertas se ordenan combinando compatibilidad técnica y confianza
+            de la fuente.
           </p>
         </div>
 
@@ -97,10 +133,12 @@ function JobList({
         selectedLevel={selectedLevel}
         selectedModality={selectedModality}
         selectedSkill={selectedSkill}
+        selectedTrust={selectedTrust}
         onSearchChange={setSearchTerm}
         onLevelChange={setSelectedLevel}
         onModalityChange={setSelectedModality}
         onSkillChange={setSelectedSkill}
+        onTrustChange={setSelectedTrust}
         onClearFilters={handleClearFilters}
       />
 
@@ -149,12 +187,21 @@ function JobList({
         </div>
       )}
 
+      {!isLoading && filteredJobs.length > 0 && (
+        <FeaturedOpportunity
+          jobs={filteredJobs}
+          userSkills={userSkills}
+          savedJobIds={savedJobIds}
+          onSaveJob={onSaveJob}
+        />
+      )}
+
       {!isLoading && (
         <>
           {filteredJobs.length === 0 ? (
             <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-10 text-center shadow-xl shadow-black/20">
               <h3 className="text-xl font-bold text-white">
-                No encontramos ofertas
+                No encontramos oportunidades
               </h3>
 
               <p className="mt-2 text-sm text-slate-400">

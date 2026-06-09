@@ -3,10 +3,12 @@ type JobFiltersProps = {
   selectedLevel: string
   selectedModality: string
   selectedSkill: string
+  selectedTrust: string
   onSearchChange: (value: string) => void
   onLevelChange: (value: string) => void
   onModalityChange: (value: string) => void
   onSkillChange: (value: string) => void
+  onTrustChange: (value: string) => void
   onClearFilters: () => void
 }
 
@@ -16,15 +18,19 @@ const skillOptions = [
   'JavaScript',
   'TypeScript',
   'React',
+  'Next.js',
   'Tailwind',
   'REST API',
   'Node.js',
   'Express',
   'SQL',
   'Git',
+  'GitHub',
   'Cypress',
   'Scrum',
   'Testing',
+  'Firebase',
+  'Supabase',
 ]
 
 function JobFilters({
@@ -32,22 +38,25 @@ function JobFilters({
   selectedLevel,
   selectedModality,
   selectedSkill,
+  selectedTrust,
   onSearchChange,
   onLevelChange,
   onModalityChange,
   onSkillChange,
+  onTrustChange,
   onClearFilters,
 }: JobFiltersProps) {
   return (
-    <div className="mb-6 rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-black/20">
+    <div className="mb-6 rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl shadow-black/20">
       <div className="mb-5">
-        <h3 className="text-lg font-bold text-white">Filtrar empleos</h3>
+        <h3 className="text-lg font-bold text-white">Filtrar oportunidades</h3>
+
         <p className="mt-1 text-sm text-slate-400">
-          Buscá ofertas por rol, nivel, modalidad o tecnología.
+          Ajustá la búsqueda según rol, stack, modalidad y confianza.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Buscar
@@ -57,7 +66,7 @@ function JobFilters({
             type="text"
             value={searchTerm}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Ej: frontend, QA, full stack..."
+            placeholder="Frontend, QA, React..."
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-blue-500"
           />
         </div>
@@ -114,6 +123,23 @@ function JobFilters({
                 {skill}
               </option>
             ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Confianza
+          </label>
+
+          <select
+            value={selectedTrust}
+            onChange={(event) => onTrustChange(event.target.value)}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500"
+          >
+            <option value="">Todas</option>
+            <option value="Alta">Alta</option>
+            <option value="Media">Media</option>
+            <option value="Baja">Baja</option>
           </select>
         </div>
       </div>
