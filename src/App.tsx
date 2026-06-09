@@ -34,7 +34,7 @@ function App() {
   const [jobsErrorMessage, setJobsErrorMessage] = useState('')
   const [isUsingFallbackJobs, setIsUsingFallbackJobs] = useState(false)
 
-useEffect(() => {
+  useEffect(() => {
   let shouldIgnore = false
 
   const fetchInitialJobs = async () => {
@@ -71,7 +71,7 @@ useEffect(() => {
   }
 }, [])
 
-const loadJobs = async () => {
+  const loadJobs = async () => {
   setIsLoadingJobs(true)
   setJobsErrorMessage('')
 

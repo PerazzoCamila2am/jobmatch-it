@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Job, SavedJob } from '../types/job'
+import { getJobSkills } from '../utils/skillDetector'
 import JobCard from './JobCard'
 import JobFilters from './JobFilters'
 
@@ -30,30 +31,31 @@ function JobList({
   const [selectedSkill, setSelectedSkill] = useState('')
 
   const filteredJobs = useMemo(() => {
-    return jobs.filter((job) => {
-      const searchValue = searchTerm.toLowerCase().trim()
+  return jobs.filter((job) => {
+    const searchValue = searchTerm.toLowerCase().trim()
 
-      const matchesSearch =
-        searchValue === '' ||
-        job.title.toLowerCase().includes(searchValue) ||
-        job.company.toLowerCase().includes(searchValue) ||
-        job.description.toLowerCase().includes(searchValue)
+    const matchesSearch =
+      searchValue === '' ||
+      job.title.toLowerCase().includes(searchValue) ||
+      job.company.toLowerCase().includes(searchValue) ||
+      job.description.toLowerCase().includes(searchValue)
 
-      const matchesLevel = selectedLevel === '' || job.level === selectedLevel
+    const matchesLevel = selectedLevel === '' || job.level === selectedLevel
 
-      const matchesModality =
-        selectedModality === '' || job.modality === selectedModality
+    const matchesModality =
+      selectedModality === '' || job.modality === selectedModality
 
-      const matchesSkill =
-        selectedSkill === '' ||
-        job.requiredSkills.some(
-          (skill) => skill.toLowerCase() === selectedSkill.toLowerCase(),
-        )
+    const finalRequiredSkills = getJobSkills(job.requiredSkills, job.description)
 
-      return matchesSearch && matchesLevel && matchesModality && matchesSkill
-    })
-  }, [jobs, searchTerm, selectedLevel, selectedModality, selectedSkill])
+    const matchesSkill =
+      selectedSkill === '' ||
+      finalRequiredSkills.some(
+        (skill) => skill.toLowerCase() === selectedSkill.toLowerCase(),
+      )
 
+    return matchesSearch && matchesLevel && matchesModality && matchesSkill
+  })
+}, [jobs, searchTerm, selectedLevel, selectedModality, selectedSkill])
   const handleClearFilters = () => {
     setSearchTerm('')
     setSelectedLevel('')

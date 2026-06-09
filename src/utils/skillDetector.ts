@@ -49,7 +49,7 @@ const skillKeywords = [
   },
   {
     name: 'REST API',
-    keywords: ['rest api', 'api rest', 'restful', 'apis rest', 'apis'],
+    keywords: ['rest api', 'api rest', 'restful', 'apis rest'],
   },
   {
     name: 'Cypress',
@@ -73,22 +73,33 @@ const skillKeywords = [
   },
 ]
 
-export function detectSkillsFromText(text: string): string[] {
-  const normalizedText = text.toLowerCase()
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 
-  const detectedSkills = skillKeywords
+function textContainsKeyword(text: string, keyword: string) {
+  const escapedKeyword = escapeRegExp(keyword)
+
+  const pattern = new RegExp(
+    `(^|[^a-zA-Z0-9])${escapedKeyword}([^a-zA-Z0-9]|$)`,
+    'i',
+  )
+
+  return pattern.test(text)
+}
+
+export function detectSkillsFromText(text: string): string[] {
+  return skillKeywords
     .filter((skill) =>
-      skill.keywords.some((keyword) => normalizedText.includes(keyword)),
+      skill.keywords.some((keyword) => textContainsKeyword(text, keyword)),
     )
     .map((skill) => skill.name)
-
-  return detectedSkills
 }
 
 export function mergeSkills(firstSkills: string[], secondSkills: string[]) {
   const allSkills = [...firstSkills, ...secondSkills]
 
-  const uniqueSkills = allSkills.filter((skill, index, array) => {
+  return allSkills.filter((skill, index, array) => {
     const normalizedSkill = skill.toLowerCase()
 
     return (
@@ -97,8 +108,6 @@ export function mergeSkills(firstSkills: string[], secondSkills: string[]) {
       ) === index
     )
   })
-
-  return uniqueSkills
 }
 
 export function getJobSkills(requiredSkills: string[], description: string) {

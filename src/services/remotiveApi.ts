@@ -44,19 +44,19 @@ function detectLevel(text: string): Job['level'] {
   }
 
   if (
-    normalizedText.includes('senior') ||
-    normalizedText.includes('sr')
-  ) {
-    return 'Senior'
-  }
-
-  if (
     normalizedText.includes('semi senior') ||
     normalizedText.includes('semi-senior') ||
     normalizedText.includes('mid level') ||
     normalizedText.includes('mid-level')
   ) {
     return 'Semi Senior'
+  }
+
+  if (
+    normalizedText.includes('senior') ||
+    normalizedText.includes('sr')
+  ) {
+    return 'Senior'
   }
 
   return 'Junior'
