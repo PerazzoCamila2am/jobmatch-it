@@ -1,5 +1,6 @@
 import type { SavedJob } from '../types/job'
 import { calculateMatchScore } from '../utils/matchCalculator'
+import { getJobSkills } from '../utils/skillDetector'
 
 type DashboardProps = {
   skills: string[]
@@ -15,7 +16,8 @@ function Dashboard({ skills, savedJobs }: DashboardProps) {
       ? 0
       : Math.round(
           savedJobs.reduce((total, job) => {
-            const { score } = calculateMatchScore(skills, job.requiredSkills)
+            const finalRequiredSkills = getJobSkills(job.requiredSkills, job.description)
+            const { score } = calculateMatchScore(skills, finalRequiredSkills)
 
             return total + score
           }, 0) / savedJobs.length,

@@ -1,5 +1,6 @@
 import type { Job } from '../types/job'
 import { calculateMatchScore } from '../utils/matchCalculator'
+import { getJobSkills } from '../utils/skillDetector'
 import MatchBadge from './MatchBadge'
 
 type JobCardProps = {
@@ -10,10 +11,12 @@ type JobCardProps = {
 }
 
 function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
+  const finalRequiredSkills = getJobSkills(job.requiredSkills, job.description)
+
   const { score, matchedSkills, missingSkills } = calculateMatchScore(
-    userSkills,
-    job.requiredSkills,
-  )
+  userSkills,
+  finalRequiredSkills,
+)
 
   return (
     <article className="rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-black/20">
@@ -49,7 +52,7 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
         </p>
 
         <div className="flex flex-wrap gap-2">
-          {job.requiredSkills.map((skill) => (
+         {finalRequiredSkills.map((skill) => (
             <span
               key={skill}
               className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-xs text-slate-300"

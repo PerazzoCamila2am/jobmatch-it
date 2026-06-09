@@ -21,7 +21,7 @@ const skillKeywords = [
   },
   {
     name: 'Next.js',
-    keywords: ['next.js', 'nextjs', 'next'],
+    keywords: ['next.js', 'nextjs'],
   },
   {
     name: 'Tailwind',
@@ -29,7 +29,7 @@ const skillKeywords = [
   },
   {
     name: 'Node.js',
-    keywords: ['node.js', 'nodejs', 'node'],
+    keywords: ['node.js', 'nodejs'],
   },
   {
     name: 'Express',
@@ -49,7 +49,7 @@ const skillKeywords = [
   },
   {
     name: 'REST API',
-    keywords: ['rest api', 'api rest', 'restful', 'apis rest', 'api'],
+    keywords: ['rest api', 'api rest', 'restful', 'apis rest', 'apis'],
   },
   {
     name: 'Cypress',
@@ -83,4 +83,26 @@ export function detectSkillsFromText(text: string): string[] {
     .map((skill) => skill.name)
 
   return detectedSkills
+}
+
+export function mergeSkills(firstSkills: string[], secondSkills: string[]) {
+  const allSkills = [...firstSkills, ...secondSkills]
+
+  const uniqueSkills = allSkills.filter((skill, index, array) => {
+    const normalizedSkill = skill.toLowerCase()
+
+    return (
+      array.findIndex(
+        (currentSkill) => currentSkill.toLowerCase() === normalizedSkill,
+      ) === index
+    )
+  })
+
+  return uniqueSkills
+}
+
+export function getJobSkills(requiredSkills: string[], description: string) {
+  const detectedSkills = detectSkillsFromText(description)
+
+  return mergeSkills(requiredSkills, detectedSkills)
 }
