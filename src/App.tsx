@@ -9,6 +9,7 @@ import DetectedSkillsAnalyzer from './components/DetectedSkillsAnalyzer'
 import type { ApplicationStatus, Job, SavedJob } from './types/job'
 import { getFromLocalStorage, saveToLocalStorage } from './utils/localStorage'
 import { getRemoteJobs } from './services/remotiveApi'
+import { fallbackJobs } from './data/fallbackJobs'
 
 const SKILLS_STORAGE_KEY = 'jobmatch-it-skills'
 const SAVED_JOBS_STORAGE_KEY = 'jobmatch-it-saved-jobs'
@@ -27,9 +28,10 @@ function App() {
     getFromLocalStorage<SavedJob[]>(SAVED_JOBS_STORAGE_KEY, []),
   )
 
- const [jobs, setJobs] = useState<Job[]>([])
-const [isLoadingJobs, setIsLoadingJobs] = useState(true)
-const [jobsErrorMessage, setJobsErrorMessage] = useState('')
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true)
+  const [jobsErrorMessage, setJobsErrorMessage] = useState('')
+  const [isUsingFallbackJobs, setIsUsingFallbackJobs] = useState(false)
 
 useEffect(() => {
   let shouldIgnore = false
@@ -40,6 +42,8 @@ useEffect(() => {
 
       if (!shouldIgnore) {
         setJobs(remoteJobs)
+        setIsUsingFallbackJobs(false)
+        setJobsErrorMessage('')
       }
     } catch (error) {
       const message =
@@ -48,6 +52,8 @@ useEffect(() => {
           : 'Ocurrió un error inesperado al cargar las ofertas'
 
       if (!shouldIgnore) {
+        setJobs(fallbackJobs)
+        setIsUsingFallbackJobs(true)
         setJobsErrorMessage(message)
       }
     } finally {
@@ -70,13 +76,18 @@ const loadJobs = async () => {
 
   try {
     const remoteJobs = await getRemoteJobs()
+
     setJobs(remoteJobs)
+    setIsUsingFallbackJobs(false)
+    setJobsErrorMessage('')
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : 'Ocurrió un error inesperado al cargar las ofertas'
 
+    setJobs(fallbackJobs)
+    setIsUsingFallbackJobs(true)
     setJobsErrorMessage(message)
   } finally {
     setIsLoadingJobs(false)
@@ -170,6 +181,7 @@ const loadJobs = async () => {
         savedJobs={savedJobs}
         isLoading={isLoadingJobs}
         errorMessage={jobsErrorMessage}
+        isUsingFallback={isUsingFallbackJobs}
         onSaveJob={handleSaveJob}
         onRetry={loadJobs}
       />

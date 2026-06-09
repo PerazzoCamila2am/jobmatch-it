@@ -9,6 +9,7 @@ type JobListProps = {
   savedJobs: SavedJob[]
   isLoading: boolean
   errorMessage: string
+  isUsingFallback: boolean
   onSaveJob: (job: Job) => void
   onRetry: () => void
 }
@@ -19,6 +20,7 @@ function JobList({
   savedJobs,
   isLoading,
   errorMessage,
+  isUsingFallback,
   onSaveJob,
   onRetry,
 }: JobListProps) {
@@ -100,32 +102,41 @@ function JobList({
         </div>
       )}
 
-      {!isLoading && errorMessage !== '' && (
-        <div className="rounded-3xl border border-red-500/30 bg-red-500/10 p-8 text-center">
-          <h3 className="text-xl font-bold text-red-200">
-            No pudimos cargar las ofertas
+      {!isLoading && isUsingFallback && (
+        <div className="mb-6 rounded-3xl border border-yellow-500/30 bg-yellow-500/10 p-6">
+          <h3 className="text-lg font-bold text-yellow-200">
+            Usando ofertas demo
           </h3>
 
-          <p className="mt-2 text-sm text-red-100">
-            {errorMessage}
+          <p className="mt-2 text-sm leading-6 text-yellow-100/80">
+            No se pudieron cargar las ofertas reales desde la API. Para que la
+            app siga funcionando, se muestran ofertas de prueba. Podés reintentar
+            la carga cuando quieras.
           </p>
+
+          {errorMessage && (
+            <p className="mt-2 text-xs text-yellow-100/60">
+              Detalle técnico: {errorMessage}
+            </p>
+          )}
 
           <button
             type="button"
             onClick={onRetry}
-            className="mt-5 rounded-xl bg-red-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
+            className="mt-4 rounded-xl bg-yellow-500 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-yellow-400"
           >
-            Reintentar
+            Reintentar API
           </button>
         </div>
       )}
 
-      {!isLoading && errorMessage === '' && (
+      {!isLoading && (
         <>
           <div className="mb-4 flex items-center justify-between">
             <p className="text-sm text-slate-400">
-              {filteredJobs.length} oferta{filteredJobs.length !== 1 ? 's' : ''}{' '}
-              encontrada{filteredJobs.length !== 1 ? 's' : ''}
+              {filteredJobs.length} oferta
+              {filteredJobs.length !== 1 ? 's' : ''} encontrada
+              {filteredJobs.length !== 1 ? 's' : ''}
             </p>
           </div>
 
