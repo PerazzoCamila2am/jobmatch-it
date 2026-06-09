@@ -187,7 +187,11 @@ function App() {
         onRetry={loadJobs}
       />
 
-      <LearningPlan jobs={jobs} userSkills={skills} />
+      <LearningPlan
+       jobs={jobs}
+       userSkills={skills}
+       onAddSkill={handleAddSkill}
+/>
 
       <ApplicationsTracker
         savedJobs={savedJobs}

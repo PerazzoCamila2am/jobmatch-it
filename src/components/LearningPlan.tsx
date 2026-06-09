@@ -5,6 +5,7 @@ import { getJobSkills } from '../utils/skillDetector'
 type LearningPlanProps = {
   jobs: Job[]
   userSkills: string[]
+  onAddSkill: (skill: string) => void
 }
 
 type MissingSkillItem = {
@@ -12,6 +13,7 @@ type MissingSkillItem = {
   count: number
   priority: 'Alta' | 'Media' | 'Baja'
   recommendation: string
+  projectIdea: string
 }
 
 function getSkillRecommendation(skill: string) {
@@ -52,6 +54,44 @@ function getSkillRecommendation(skill: string) {
   return 'Buscá un proyecto pequeño donde puedas aplicar esta tecnología de forma práctica.'
 }
 
+function getProjectIdea(skill: string) {
+  const normalizedSkill = skill.toLowerCase()
+
+  if (normalizedSkill === 'typescript') {
+    return 'Convertí un componente React existente a TypeScript con props tipadas.'
+  }
+
+  if (normalizedSkill === 'react') {
+    return 'Creá una mini app con componentes, estado, filtros y formularios.'
+  }
+
+  if (normalizedSkill === 'next.js') {
+    return 'Armá una landing con rutas, layouts y una página de detalle.'
+  }
+
+  if (normalizedSkill === 'tailwind') {
+    return 'Diseñá una sección responsive con cards, grid y dark mode.'
+  }
+
+  if (normalizedSkill === 'rest api') {
+    return 'Creá un buscador que consuma una API, maneje loading, errores y resultados vacíos.'
+  }
+
+  if (normalizedSkill === 'node.js') {
+    return 'Creá una API simple con rutas GET, POST, PUT y DELETE.'
+  }
+
+  if (normalizedSkill === 'sql') {
+    return 'Diseñá una base de datos simple de usuarios, ofertas y postulaciones.'
+  }
+
+  if (normalizedSkill === 'testing' || normalizedSkill === 'cypress') {
+    return 'Automatizá un flujo simple: cargar skills, filtrar empleos y guardar una oferta.'
+  }
+
+  return 'Aplicala en una pequeña funcionalidad dentro de JobMatch IT.'
+}
+
 function getPriority(count: number): MissingSkillItem['priority'] {
   if (count >= 4) return 'Alta'
   if (count >= 2) return 'Media'
@@ -70,7 +110,7 @@ function getPriorityClasses(priority: MissingSkillItem['priority']) {
   return 'border-blue-500/20 bg-blue-500/10 text-blue-300'
 }
 
-function LearningPlan({ jobs, userSkills }: LearningPlanProps) {
+function LearningPlan({ jobs, userSkills, onAddSkill }: LearningPlanProps) {
   const missingSkillMap = jobs.reduce<Record<string, number>>((acc, job) => {
     const finalRequiredSkills = getJobSkills(job.requiredSkills, job.description)
 
@@ -92,6 +132,7 @@ function LearningPlan({ jobs, userSkills }: LearningPlanProps) {
       count,
       priority: getPriority(count),
       recommendation: getSkillRecommendation(skill),
+      projectIdea: getProjectIdea(skill),
     }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 6)
@@ -110,7 +151,7 @@ function LearningPlan({ jobs, userSkills }: LearningPlanProps) {
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
             Priorizamos las tecnologías que más aparecen como faltantes en las
-            ofertas analizadas.
+            oportunidades analizadas.
           </p>
         </div>
 
@@ -172,9 +213,35 @@ function LearningPlan({ jobs, userSkills }: LearningPlanProps) {
                 </p>
               </div>
 
-              <p className="text-sm leading-6 text-slate-300">
-                {item.recommendation}
-              </p>
+              <div className="space-y-4">
+                <div>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-300/80">
+                    Recomendación
+                  </p>
+
+                  <p className="text-sm leading-6 text-slate-300">
+                    {item.recommendation}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-blue-500/15 bg-blue-500/5 p-4">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-300/80">
+                    Mini práctica sugerida
+                  </p>
+
+                  <p className="text-sm leading-6 text-slate-300">
+                    {item.projectIdea}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onAddSkill(item.skill)}
+                className="mt-5 w-full rounded-xl bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-600"
+              >
+                Agregar a mis habilidades
+              </button>
             </article>
           ))}
         </div>
