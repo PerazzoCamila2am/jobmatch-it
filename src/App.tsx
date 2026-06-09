@@ -9,7 +9,7 @@ import DetectedSkillsAnalyzer from './components/DetectedSkillsAnalyzer'
 import LearningPlan from './components/LearningPlan'
 import type { ApplicationStatus, Job, SavedJob } from './types/job'
 import { getFromLocalStorage, saveToLocalStorage } from './utils/localStorage'
-import { getRemoteJobs } from './services/remotiveApi'
+import { getJobsFromMultipleSources } from './services/jobsApi'
 import { fallbackJobs } from './data/fallbackJobs'
 
 const SKILLS_STORAGE_KEY = 'jobmatch-it-skills'
@@ -39,7 +39,7 @@ function App() {
 
   const fetchInitialJobs = async () => {
     try {
-      const remoteJobs = await getRemoteJobs()
+      const remoteJobs = await getJobsFromMultipleSources()
 
       if (!shouldIgnore) {
         setJobs(remoteJobs)
@@ -76,7 +76,7 @@ function App() {
   setJobsErrorMessage('')
 
   try {
-    const remoteJobs = await getRemoteJobs()
+    const remoteJobs = await getJobsFromMultipleSources()
 
     setJobs(remoteJobs)
     setIsUsingFallbackJobs(false)
