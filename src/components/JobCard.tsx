@@ -1,6 +1,7 @@
 import type { Job } from '../types/job'
 import { calculateMatchScore } from '../utils/matchCalculator'
 import { getJobSkills } from '../utils/skillDetector'
+import { calculateJobTrust } from '../utils/trustCalculator'
 import MatchBadge from './MatchBadge'
 
 type JobCardProps = {
@@ -16,8 +17,22 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
   const { score, matchedSkills, missingSkills, recommendation } =
     calculateMatchScore(userSkills, finalRequiredSkills)
 
+  const trust = calculateJobTrust(job)
+
   const visibleSkills = finalRequiredSkills.slice(0, 8)
   const hiddenSkillsCount = finalRequiredSkills.length - visibleSkills.length
+
+  const getTrustClasses = () => {
+    if (trust.level === 'Alta') {
+      return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+    }
+
+    if (trust.level === 'Media') {
+      return 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300'
+    }
+
+    return 'border-red-500/30 bg-red-500/10 text-red-300'
+  }
 
   return (
     <article className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/85 shadow-xl shadow-black/20 transition hover:border-slate-700">
@@ -38,6 +53,12 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
                   {job.source}
                 </span>
               )}
+
+              <span
+                className={`rounded-full border px-3 py-1 text-xs font-medium ${getTrustClasses()}`}
+              >
+                Confianza {trust.level}
+              </span>
             </div>
 
             <h3 className="text-xl font-bold leading-snug text-white">
@@ -45,7 +66,7 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
             </h3>
 
             <p className="mt-2 text-sm text-slate-400">
-              {job.company} · {job.location}
+              {job.company || 'Empresa no informada'} · {job.location}
             </p>
           </div>
 
@@ -128,9 +149,7 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
 
           <div className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-semibold text-red-300">
-                A reforzar
-              </p>
+              <p className="text-sm font-semibold text-red-300">A reforzar</p>
 
               <span className="text-xs text-red-300/70">
                 {missingSkills.length}
@@ -163,13 +182,69 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
         </div>
 
         <div className="rounded-2xl border border-blue-500/15 bg-blue-500/5 p-4">
-          <p className="text-sm font-semibold text-blue-300">
-            Recomendación
-          </p>
+          <p className="text-sm font-semibold text-blue-300">Recomendación</p>
 
           <p className="mt-2 text-sm leading-6 text-slate-300">
             {recommendation}
           </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-slate-200">
+                Confianza de la oferta
+              </p>
+
+              <p className="mt-1 text-sm text-slate-400">
+                Score interno: {trust.score}%
+              </p>
+            </div>
+
+            <span
+              className={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${getTrustClasses()}`}
+            >
+              {trust.level}
+            </span>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300/80">
+                Señales positivas
+              </p>
+
+              {trust.reasons.length === 0 ? (
+                <p className="text-sm text-slate-500">
+                  No se detectaron señales positivas fuertes.
+                </p>
+              ) : (
+                <ul className="space-y-1 text-sm text-slate-400">
+                  {trust.reasons.slice(0, 4).map((reason) => (
+                    <li key={reason}>• {reason}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-yellow-300/80">
+                Alertas
+              </p>
+
+              {trust.warnings.length === 0 ? (
+                <p className="text-sm text-slate-500">
+                  No se detectaron alertas relevantes.
+                </p>
+              ) : (
+                <ul className="space-y-1 text-sm text-slate-400">
+                  {trust.warnings.slice(0, 4).map((warning) => (
+                    <li key={warning}>• {warning}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3 border-t border-slate-800 pt-5 sm:flex-row sm:items-center sm:justify-between">
