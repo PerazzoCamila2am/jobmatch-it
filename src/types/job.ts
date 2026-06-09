@@ -7,6 +7,8 @@ export type Job = {
   modality: 'Remoto' | 'Híbrido' | 'Presencial'
   description: string
   requiredSkills: string[]
+  url?: string
+  source?: string
 }
 
 export type ApplicationStatus =

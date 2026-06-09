@@ -125,6 +125,27 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
           {isSaved ? 'Oferta guardada' : 'Guardar oferta'}
         </button>
       </div>
+
+            {(job.url || job.source) && (
+        <div className="mt-5 border-t border-slate-800 pt-4 text-sm text-slate-400">
+          {job.source && (
+            <span>
+              Fuente: {job.source}
+            </span>
+          )}
+
+          {job.url && (
+            <a
+              href={job.url}
+              target="_blank"
+              rel="noreferrer"
+              className="ml-3 font-semibold text-blue-400 transition hover:text-blue-300"
+            >
+              Ver oferta original
+            </a>
+          )}
+        </div>
+      )}
     </article>
   )
 }

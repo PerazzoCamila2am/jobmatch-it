@@ -8,6 +8,7 @@ import Dashboard from './components/Dashboard'
 import DetectedSkillsAnalyzer from './components/DetectedSkillsAnalyzer'
 import type { ApplicationStatus, Job, SavedJob } from './types/job'
 import { getFromLocalStorage, saveToLocalStorage } from './utils/localStorage'
+import { getRemoteJobs } from './services/remotiveApi'
 
 const SKILLS_STORAGE_KEY = 'jobmatch-it-skills'
 const SAVED_JOBS_STORAGE_KEY = 'jobmatch-it-saved-jobs'
@@ -25,6 +26,62 @@ function App() {
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>(() =>
     getFromLocalStorage<SavedJob[]>(SAVED_JOBS_STORAGE_KEY, []),
   )
+
+ const [jobs, setJobs] = useState<Job[]>([])
+const [isLoadingJobs, setIsLoadingJobs] = useState(true)
+const [jobsErrorMessage, setJobsErrorMessage] = useState('')
+
+useEffect(() => {
+  let shouldIgnore = false
+
+  const fetchInitialJobs = async () => {
+    try {
+      const remoteJobs = await getRemoteJobs()
+
+      if (!shouldIgnore) {
+        setJobs(remoteJobs)
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ocurrió un error inesperado al cargar las ofertas'
+
+      if (!shouldIgnore) {
+        setJobsErrorMessage(message)
+      }
+    } finally {
+      if (!shouldIgnore) {
+        setIsLoadingJobs(false)
+      }
+    }
+  }
+
+  fetchInitialJobs()
+
+  return () => {
+    shouldIgnore = true
+  }
+}, [])
+
+const loadJobs = async () => {
+  setIsLoadingJobs(true)
+  setJobsErrorMessage('')
+
+  try {
+    const remoteJobs = await getRemoteJobs()
+    setJobs(remoteJobs)
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Ocurrió un error inesperado al cargar las ofertas'
+
+    setJobsErrorMessage(message)
+  } finally {
+    setIsLoadingJobs(false)
+  }
+}
 
   useEffect(() => {
     saveToLocalStorage(SKILLS_STORAGE_KEY, skills)
@@ -108,9 +165,13 @@ function App() {
       <DetectedSkillsAnalyzer />
 
       <JobList
+        jobs={jobs}
         userSkills={skills}
         savedJobs={savedJobs}
+        isLoading={isLoadingJobs}
+        errorMessage={jobsErrorMessage}
         onSaveJob={handleSaveJob}
+        onRetry={loadJobs}
       />
 
       <ApplicationsTracker
