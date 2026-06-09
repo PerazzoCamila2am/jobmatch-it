@@ -53,15 +53,21 @@ function getSkillRecommendation(skill: string) {
 }
 
 function getPriority(count: number): MissingSkillItem['priority'] {
-  if (count >= 4) {
-    return 'Alta'
-  }
-
-  if (count >= 2) {
-    return 'Media'
-  }
-
+  if (count >= 4) return 'Alta'
+  if (count >= 2) return 'Media'
   return 'Baja'
+}
+
+function getPriorityClasses(priority: MissingSkillItem['priority']) {
+  if (priority === 'Alta') {
+    return 'border-red-500/20 bg-red-500/10 text-red-300'
+  }
+
+  if (priority === 'Media') {
+    return 'border-yellow-500/20 bg-yellow-500/10 text-yellow-300'
+  }
+
+  return 'border-blue-500/20 bg-blue-500/10 text-blue-300'
 }
 
 function LearningPlan({ jobs, userSkills }: LearningPlanProps) {
@@ -91,65 +97,82 @@ function LearningPlan({ jobs, userSkills }: LearningPlanProps) {
     .slice(0, 6)
 
   return (
-    <section id="learning-plan" className="mx-auto max-w-6xl px-6 py-10">
-      <div className="mb-6">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-blue-400">
-          Paso 6
-        </p>
+    <section id="learning-plan" className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+          <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">
+            Plan recomendado
+          </span>
 
-        <h2 className="mt-2 text-2xl font-bold text-white">
-          Plan de aprendizaje recomendado
-        </h2>
+          <h2 className="mt-4 text-3xl font-bold text-white">
+            Qué reforzar primero
+          </h2>
 
-        <p className="mt-2 text-slate-400">
-          La app analiza las tecnologías que más te faltan en las ofertas y te
-          sugiere qué reforzar primero.
-        </p>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+            Priorizamos las tecnologías que más aparecen como faltantes en las
+            ofertas analizadas.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-5 py-4 text-right">
+          <p className="text-3xl font-bold text-white">{missingSkillItems.length}</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+            prioridades
+          </p>
+        </div>
       </div>
 
       {missingSkillItems.length === 0 ? (
-        <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-8 text-center">
+        <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-10 text-center shadow-xl shadow-black/20">
           <h3 className="text-xl font-bold text-emerald-200">
-            Tu perfil coincide muy bien
+            Tu perfil está muy bien alineado
           </h3>
 
-          <p className="mt-2 text-slate-300">
+          <p className="mt-2 text-sm text-slate-300">
             No detectamos tecnologías faltantes en las ofertas analizadas.
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {missingSkillItems.map((item) => (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {missingSkillItems.map((item, index) => (
             <article
               key={item.skill}
-              className="rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-black/20"
+              className="rounded-3xl border border-slate-800 bg-slate-900/85 p-6 shadow-xl shadow-black/20 transition hover:border-slate-700"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-bold text-white">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Prioridad #{index + 1}
+                  </p>
+
+                  <h3 className="mt-2 text-xl font-bold text-white">
                     {item.skill}
                   </h3>
-
-                  <p className="mt-1 text-sm text-slate-400">
-                    Aparece como faltante en {item.count} oferta
-                    {item.count !== 1 ? 's' : ''}.
-                  </p>
                 </div>
 
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    item.priority === 'Alta'
-                      ? 'bg-red-500/10 text-red-300'
-                      : item.priority === 'Media'
-                        ? 'bg-yellow-500/10 text-yellow-300'
-                        : 'bg-blue-500/10 text-blue-300'
-                  }`}
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${getPriorityClasses(
+                    item.priority,
+                  )}`}
                 >
-                  Prioridad {item.priority}
+                  {item.priority}
                 </span>
               </div>
 
-              <p className="mt-5 text-sm leading-6 text-slate-300">
+              <div className="mb-5 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                <p className="text-sm text-slate-400">
+                  Aparece como faltante en
+                </p>
+
+                <p className="mt-1 text-3xl font-bold text-white">
+                  {item.count}
+                  <span className="ml-2 text-sm font-normal text-slate-500">
+                    oferta{item.count !== 1 ? 's' : ''}
+                  </span>
+                </p>
+              </div>
+
+              <p className="text-sm leading-6 text-slate-300">
                 {item.recommendation}
               </p>
             </article>
