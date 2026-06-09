@@ -162,7 +162,7 @@ function App() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#172554_0,_#020617_35%,_#020617_100%)] text-white">
       <Header />
       <Hero />
 
