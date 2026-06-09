@@ -6,6 +6,7 @@ import JobList from './components/JobList'
 import ApplicationsTracker from './components/ApplicationsTracker'
 import Dashboard from './components/Dashboard'
 import DetectedSkillsAnalyzer from './components/DetectedSkillsAnalyzer'
+import LearningPlan from './components/LearningPlan'
 import type { ApplicationStatus, Job, SavedJob } from './types/job'
 import { getFromLocalStorage, saveToLocalStorage } from './utils/localStorage'
 import { getRemoteJobs } from './services/remotiveApi'
@@ -185,6 +186,8 @@ const loadJobs = async () => {
         onSaveJob={handleSaveJob}
         onRetry={loadJobs}
       />
+
+      <LearningPlan jobs={jobs} userSkills={skills} />
 
       <ApplicationsTracker
         savedJobs={savedJobs}

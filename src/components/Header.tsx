@@ -26,6 +26,10 @@ function Header() {
                 Empleos
             </a>
 
+            <a href="#learning-plan" className="transition hover:text-white">
+                 Plan
+            </a>
+
             <a href="#applications" className="transition hover:text-white">
                 Postulaciones
             </a>
