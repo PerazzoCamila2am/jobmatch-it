@@ -22,3 +22,9 @@ export type SavedJob = Job & {
   status: ApplicationStatus
   savedAt: string
 }
+
+export type UserPreferences = {
+  preferredCountry: string
+  preferredLanguage: string
+  preferredModality: string
+}

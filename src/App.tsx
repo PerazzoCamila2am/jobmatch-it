@@ -7,8 +7,19 @@ import ApplicationsTracker from './components/ApplicationsTracker'
 import Dashboard from './components/Dashboard'
 import DetectedSkillsAnalyzer from './components/DetectedSkillsAnalyzer'
 import LearningPlan from './components/LearningPlan'
-import type { ApplicationStatus, Job, SavedJob } from './types/job'
-import { getFromLocalStorage, saveToLocalStorage } from './utils/localStorage'
+import SearchPreferences from './components/SearchPreferences'
+import type {
+  ApplicationStatus,
+  Job,
+  SavedJob,
+  UserPreferences,
+} from './types/job'
+import {
+  getFromLocalStorage,
+  getStoredPreferences,
+  savePreferences,
+  saveToLocalStorage,
+} from './utils/localStorage'
 import { getJobsFromMultipleSources } from './services/jobsApi'
 import { fallbackJobs } from './data/fallbackJobs'
 
@@ -29,71 +40,75 @@ function App() {
     getFromLocalStorage<SavedJob[]>(SAVED_JOBS_STORAGE_KEY, []),
   )
 
+  const [preferences, setPreferences] = useState<UserPreferences>(() =>
+    getStoredPreferences(),
+  )
+
   const [jobs, setJobs] = useState<Job[]>([])
   const [isLoadingJobs, setIsLoadingJobs] = useState(true)
   const [jobsErrorMessage, setJobsErrorMessage] = useState('')
   const [isUsingFallbackJobs, setIsUsingFallbackJobs] = useState(false)
 
   useEffect(() => {
-  let shouldIgnore = false
+    let shouldIgnore = false
 
-  const fetchInitialJobs = async () => {
+    const fetchInitialJobs = async () => {
+      try {
+        const remoteJobs = await getJobsFromMultipleSources()
+
+        if (!shouldIgnore) {
+          setJobs(remoteJobs)
+          setIsUsingFallbackJobs(false)
+          setJobsErrorMessage('')
+        }
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Ocurrió un error inesperado al cargar las ofertas'
+
+        if (!shouldIgnore) {
+          setJobs(fallbackJobs)
+          setIsUsingFallbackJobs(true)
+          setJobsErrorMessage(message)
+        }
+      } finally {
+        if (!shouldIgnore) {
+          setIsLoadingJobs(false)
+        }
+      }
+    }
+
+    fetchInitialJobs()
+
+    return () => {
+      shouldIgnore = true
+    }
+  }, [])
+
+  const loadJobs = async () => {
+    setIsLoadingJobs(true)
+    setJobsErrorMessage('')
+
     try {
       const remoteJobs = await getJobsFromMultipleSources()
 
-      if (!shouldIgnore) {
-        setJobs(remoteJobs)
-        setIsUsingFallbackJobs(false)
-        setJobsErrorMessage('')
-      }
+      setJobs(remoteJobs)
+      setIsUsingFallbackJobs(false)
+      setJobsErrorMessage('')
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
           : 'Ocurrió un error inesperado al cargar las ofertas'
 
-      if (!shouldIgnore) {
-        setJobs(fallbackJobs)
-        setIsUsingFallbackJobs(true)
-        setJobsErrorMessage(message)
-      }
+      setJobs(fallbackJobs)
+      setIsUsingFallbackJobs(true)
+      setJobsErrorMessage(message)
     } finally {
-      if (!shouldIgnore) {
-        setIsLoadingJobs(false)
-      }
+      setIsLoadingJobs(false)
     }
   }
-
-  fetchInitialJobs()
-
-  return () => {
-    shouldIgnore = true
-  }
-}, [])
-
-  const loadJobs = async () => {
-  setIsLoadingJobs(true)
-  setJobsErrorMessage('')
-
-  try {
-    const remoteJobs = await getJobsFromMultipleSources()
-
-    setJobs(remoteJobs)
-    setIsUsingFallbackJobs(false)
-    setJobsErrorMessage('')
-  } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : 'Ocurrió un error inesperado al cargar las ofertas'
-
-    setJobs(fallbackJobs)
-    setIsUsingFallbackJobs(true)
-    setJobsErrorMessage(message)
-  } finally {
-    setIsLoadingJobs(false)
-  }
-}
 
   useEffect(() => {
     saveToLocalStorage(SKILLS_STORAGE_KEY, skills)
@@ -104,15 +119,21 @@ function App() {
   }, [savedJobs])
 
   const handleAddSkill = (newSkill: string) => {
+    const normalizedSkill = newSkill.trim()
+
+    if (normalizedSkill === '') {
+      return
+    }
+
     const skillAlreadyExists = skills.some(
-      (skill) => skill.toLowerCase() === newSkill.toLowerCase(),
+      (skill) => skill.toLowerCase() === normalizedSkill.toLowerCase(),
     )
 
     if (skillAlreadyExists) {
       return
     }
 
-    setSkills([...skills, newSkill])
+    setSkills([...skills, normalizedSkill])
   }
 
   const handleRemoveSkill = (skillToRemove: string) => {
@@ -161,6 +182,11 @@ function App() {
     setSavedJobs(updatedSavedJobs)
   }
 
+  const handleUpdatePreferences = (newPreferences: UserPreferences) => {
+    setPreferences(newPreferences)
+    savePreferences(newPreferences)
+  }
+
   return (
     <main className="min-h-screen bg-radial-[circle_at_top,#172554_0,#020617_35%,#020617_100%] text-white">
       <Header />
@@ -170,6 +196,11 @@ function App() {
         skills={skills}
         onAddSkill={handleAddSkill}
         onRemoveSkill={handleRemoveSkill}
+      />
+
+      <SearchPreferences
+        preferences={preferences}
+        onUpdatePreferences={handleUpdatePreferences}
       />
 
       <Dashboard skills={skills} savedJobs={savedJobs} />
@@ -188,10 +219,10 @@ function App() {
       />
 
       <LearningPlan
-       jobs={jobs}
-       userSkills={skills}
-       onAddSkill={handleAddSkill}
-/>
+        jobs={jobs}
+        userSkills={skills}
+        onAddSkill={handleAddSkill}
+      />
 
       <ApplicationsTracker
         savedJobs={savedJobs}
