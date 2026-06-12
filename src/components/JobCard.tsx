@@ -1,4 +1,5 @@
 import type { Job } from '../types/job'
+import { detectJobLanguage } from '../utils/languageDetector'
 import { calculateMatchScore } from '../utils/matchCalculator'
 import { getJobSkills } from '../utils/skillDetector'
 import { calculateJobTrust } from '../utils/trustCalculator'
@@ -18,6 +19,7 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
     calculateMatchScore(userSkills, finalRequiredSkills)
 
   const trust = calculateJobTrust(job)
+  const language = detectJobLanguage(`${job.title} ${job.description}`)
 
   const visibleSkills = finalRequiredSkills.slice(0, 8)
   const hiddenSkillsCount = finalRequiredSkills.length - visibleSkills.length
@@ -58,6 +60,10 @@ function JobCard({ job, userSkills, isSaved, onSaveJob }: JobCardProps) {
                 className={`rounded-full border px-3 py-1 text-xs font-medium ${getTrustClasses()}`}
               >
                 Confianza {trust.level}
+              </span>
+
+              <span className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-xs font-medium text-slate-300">
+                {language}
               </span>
             </div>
 

@@ -10,7 +10,14 @@ export type TrustResult = {
   warnings: string[]
 }
 
-const trustedSources = ['Remotive', 'Arbeitnow', 'Remote OK', 'Fallback demo']
+const trustedSources = [
+  'Remotive',
+  'Arbeitnow',
+  'Remote OK',
+  'Jobicy',
+  'Himalayas',
+  'Fallback demo',
+]
 
 const trustedCompanies = [
   'Mercado Libre',

@@ -5,12 +5,14 @@ type JobFiltersProps = {
   selectedSkill: string
   selectedTrust: string
   selectedCountry: string
+  selectedLanguage: string
   onSearchChange: (value: string) => void
   onLevelChange: (value: string) => void
   onModalityChange: (value: string) => void
   onSkillChange: (value: string) => void
   onTrustChange: (value: string) => void
   onCountryChange: (value: string) => void
+  onLanguageChange: (value: string) => void
   onClearFilters: () => void
 }
 
@@ -48,6 +50,8 @@ const countryOptions = [
   'Mexico',
 ]
 
+const languageOptions = ['Español', 'Inglés', 'Alemán', 'Portugués', 'Otro']
+
 function JobFilters({
   searchTerm,
   selectedLevel,
@@ -55,12 +59,14 @@ function JobFilters({
   selectedSkill,
   selectedTrust,
   selectedCountry,
+  selectedLanguage,
   onSearchChange,
   onLevelChange,
   onModalityChange,
   onSkillChange,
   onTrustChange,
   onCountryChange,
+  onLanguageChange,
   onClearFilters,
 }: JobFiltersProps) {
   return (
@@ -69,11 +75,12 @@ function JobFilters({
         <h3 className="text-lg font-bold text-white">Filtrar oportunidades</h3>
 
         <p className="mt-1 text-sm text-slate-400">
-          Ajustá la búsqueda según rol, stack, modalidad, país y confianza.
+          Ajustá la búsqueda según rol, stack, modalidad, país, idioma y
+          confianza.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Buscar
@@ -158,6 +165,26 @@ function JobFilters({
             {countryOptions.map((country) => (
               <option key={country} value={country}>
                 {country}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Idioma
+          </label>
+
+          <select
+            value={selectedLanguage}
+            onChange={(event) => onLanguageChange(event.target.value)}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500"
+          >
+            <option value="">Todos</option>
+
+            {languageOptions.map((language) => (
+              <option key={language} value={language}>
+                {language}
               </option>
             ))}
           </select>

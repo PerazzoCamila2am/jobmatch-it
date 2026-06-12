@@ -1,6 +1,8 @@
 import type { Job } from '../types/job'
-import { getRemoteJobs } from './remotiveApi'
 import { getArbeitnowJobs } from './arbeitnowApi'
+import { getJobicyJobs } from './jobicyApi'
+import { getRemoteJobs } from './remotiveApi'
+import { getRemoteOkJobs } from './remoteOkApi'
 
 function removeDuplicatedJobs(jobs: Job[]) {
   const uniqueJobs = jobs.filter((job, index, array) => {
@@ -8,7 +10,8 @@ function removeDuplicatedJobs(jobs: Job[]) {
 
     return (
       array.findIndex((currentJob) => {
-        const normalizedJob = `${currentJob.title}-${currentJob.company}`.toLowerCase()
+        const normalizedJob =
+          `${currentJob.title}-${currentJob.company}`.toLowerCase()
 
         return normalizedJob === normalizedCurrentJob
       }) === index
@@ -19,7 +22,12 @@ function removeDuplicatedJobs(jobs: Job[]) {
 }
 
 export async function getJobsFromMultipleSources(): Promise<Job[]> {
-  const results = await Promise.allSettled([getRemoteJobs(), getArbeitnowJobs()])
+  const results = await Promise.allSettled([
+    getRemoteJobs(),
+    getArbeitnowJobs(),
+    getRemoteOkJobs(),
+    getJobicyJobs(),
+  ])
 
   const successfulJobs = results.flatMap((result) => {
     if (result.status === 'fulfilled') {
@@ -33,5 +41,5 @@ export async function getJobsFromMultipleSources(): Promise<Job[]> {
     throw new Error('No se pudieron cargar ofertas desde ninguna fuente')
   }
 
-  return removeDuplicatedJobs(successfulJobs).slice(0, 40)
+  return removeDuplicatedJobs(successfulJobs).slice(0, 80)
 }

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Job, SavedJob } from '../types/job'
+import { detectJobLanguage } from '../utils/languageDetector'
 import { calculateOpportunityScore } from '../utils/opportunityScore'
 import { getJobSkills } from '../utils/skillDetector'
 import { calculateJobTrust } from '../utils/trustCalculator'
@@ -36,6 +37,7 @@ function JobList({
   const [selectedSkill, setSelectedSkill] = useState('')
   const [selectedTrust, setSelectedTrust] = useState('')
   const [selectedCountry, setSelectedCountry] = useState('')
+  const [selectedLanguage, setSelectedLanguage] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
 
   const filteredJobs = useMemo(() => {
@@ -71,8 +73,13 @@ function JobList({
           selectedTrust === '' || trust.level === selectedTrust
 
         const matchesCountry =
-        selectedCountry === '' ||
-        job.location.toLowerCase().includes(selectedCountry.toLowerCase())
+          selectedCountry === '' ||
+          job.location.toLowerCase().includes(selectedCountry.toLowerCase())
+
+        const language = detectJobLanguage(`${job.title} ${job.description}`)
+
+        const matchesLanguage =
+          selectedLanguage === '' || language === selectedLanguage
 
         return (
           matchesSearch &&
@@ -80,7 +87,8 @@ function JobList({
           matchesModality &&
           matchesSkill &&
           matchesTrust &&
-          matchesCountry
+          matchesCountry &&
+          matchesLanguage
         )
       })
       .sort((a, b) => {
@@ -98,6 +106,7 @@ function JobList({
     selectedSkill,
     selectedTrust,
     selectedCountry,
+    selectedLanguage,
   ])
 
   const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE)
@@ -112,7 +121,6 @@ function JobList({
 
   const endResult = Math.min(currentPage * JOBS_PER_PAGE, filteredJobs.length)
 
-
   const handleClearFilters = () => {
     setSearchTerm('')
     setSelectedLevel('')
@@ -120,6 +128,42 @@ function JobList({
     setSelectedSkill('')
     setSelectedTrust('')
     setSelectedCountry('')
+    setSelectedLanguage('')
+    setCurrentPage(1)
+  }
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    setCurrentPage(1)
+  }
+
+  const handleLevelChange = (value: string) => {
+    setSelectedLevel(value)
+    setCurrentPage(1)
+  }
+
+  const handleModalityChange = (value: string) => {
+    setSelectedModality(value)
+    setCurrentPage(1)
+  }
+
+  const handleSkillChange = (value: string) => {
+    setSelectedSkill(value)
+    setCurrentPage(1)
+  }
+
+  const handleTrustChange = (value: string) => {
+    setSelectedTrust(value)
+    setCurrentPage(1)
+  }
+
+  const handleCountryChange = (value: string) => {
+    setSelectedCountry(value)
+    setCurrentPage(1)
+  }
+
+  const handleLanguageChange = (value: string) => {
+    setSelectedLanguage(value)
     setCurrentPage(1)
   }
 
@@ -132,37 +176,6 @@ function JobList({
   }
 
   const savedJobIds = savedJobs.map((job) => job.id)
-
-  const handleSearchChange = (value: string) => {
-  setSearchTerm(value)
-  setCurrentPage(1)
-}
-
-const handleLevelChange = (value: string) => {
-  setSelectedLevel(value)
-  setCurrentPage(1)
-}
-
-const handleModalityChange = (value: string) => {
-  setSelectedModality(value)
-  setCurrentPage(1)
-}
-
-const handleSkillChange = (value: string) => {
-  setSelectedSkill(value)
-  setCurrentPage(1)
-}
-
-const handleTrustChange = (value: string) => {
-  setSelectedTrust(value)
-  setCurrentPage(1)
-}
-
-const handleCountryChange = (value: string) => {
-  setSelectedCountry(value)
-  setCurrentPage(1)
-}
-
 
   return (
     <section id="jobs" className="mx-auto max-w-7xl px-6 py-10">
@@ -177,8 +190,8 @@ const handleCountryChange = (value: string) => {
           </h2>
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-            Las ofertas se ordenan combinando compatibilidad técnica y confianza
-            de la fuente.
+            Las ofertas se ordenan combinando compatibilidad técnica, confianza
+            de la fuente e idioma detectado.
           </p>
         </div>
 
@@ -198,14 +211,16 @@ const handleCountryChange = (value: string) => {
         selectedModality={selectedModality}
         selectedSkill={selectedSkill}
         selectedTrust={selectedTrust}
+        selectedCountry={selectedCountry}
+        selectedLanguage={selectedLanguage}
         onSearchChange={handleSearchChange}
         onLevelChange={handleLevelChange}
         onModalityChange={handleModalityChange}
         onSkillChange={handleSkillChange}
         onTrustChange={handleTrustChange}
-        onClearFilters={handleClearFilters}
-        selectedCountry={selectedCountry}
         onCountryChange={handleCountryChange}
+        onLanguageChange={handleLanguageChange}
+        onClearFilters={handleClearFilters}
       />
 
       {isLoading && (
@@ -217,7 +232,7 @@ const handleCountryChange = (value: string) => {
           </h3>
 
           <p className="mt-2 text-sm text-slate-400">
-            Estamos obteniendo empleos remotos desde la API.
+            Estamos obteniendo empleos remotos desde las fuentes disponibles.
           </p>
         </div>
       )}
@@ -271,7 +286,7 @@ const handleCountryChange = (value: string) => {
               </h3>
 
               <p className="mt-2 text-sm text-slate-400">
-                Probá limpiar filtros o buscar otra tecnología.
+                Probá limpiar filtros o buscar otra tecnología, país o idioma.
               </p>
 
               <button
@@ -335,7 +350,7 @@ const handleCountryChange = (value: string) => {
                     Anterior
                   </button>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center justify-center gap-2">
                     {Array.from({ length: totalPages }).map((_, index) => {
                       const pageNumber = index + 1
 
