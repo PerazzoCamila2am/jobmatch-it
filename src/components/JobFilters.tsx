@@ -4,11 +4,13 @@ type JobFiltersProps = {
   selectedModality: string
   selectedSkill: string
   selectedTrust: string
+  selectedCountry: string
   onSearchChange: (value: string) => void
   onLevelChange: (value: string) => void
   onModalityChange: (value: string) => void
   onSkillChange: (value: string) => void
   onTrustChange: (value: string) => void
+  onCountryChange: (value: string) => void
   onClearFilters: () => void
 }
 
@@ -33,17 +35,32 @@ const skillOptions = [
   'Supabase',
 ]
 
+const countryOptions = [
+  'Worldwide',
+  'Argentina',
+  'United States',
+  'Europe',
+  'Spain',
+  'Canada',
+  'Germany',
+  'United Kingdom',
+  'Brazil',
+  'Mexico',
+]
+
 function JobFilters({
   searchTerm,
   selectedLevel,
   selectedModality,
   selectedSkill,
   selectedTrust,
+  selectedCountry,
   onSearchChange,
   onLevelChange,
   onModalityChange,
   onSkillChange,
   onTrustChange,
+  onCountryChange,
   onClearFilters,
 }: JobFiltersProps) {
   return (
@@ -52,11 +69,11 @@ function JobFilters({
         <h3 className="text-lg font-bold text-white">Filtrar oportunidades</h3>
 
         <p className="mt-1 text-sm text-slate-400">
-          Ajustá la búsqueda según rol, stack, modalidad y confianza.
+          Ajustá la búsqueda según rol, stack, modalidad, país y confianza.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Buscar
@@ -121,6 +138,26 @@ function JobFilters({
             {skillOptions.map((skill) => (
               <option key={skill} value={skill}>
                 {skill}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            País / ubicación
+          </label>
+
+          <select
+            value={selectedCountry}
+            onChange={(event) => onCountryChange(event.target.value)}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500"
+          >
+            <option value="">Todas</option>
+
+            {countryOptions.map((country) => (
+              <option key={country} value={country}>
+                {country}
               </option>
             ))}
           </select>

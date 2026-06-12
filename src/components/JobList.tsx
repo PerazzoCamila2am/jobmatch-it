@@ -18,6 +18,8 @@ type JobListProps = {
   onRetry: () => void
 }
 
+const JOBS_PER_PAGE = 5
+
 function JobList({
   jobs,
   userSkills,
@@ -33,6 +35,8 @@ function JobList({
   const [selectedModality, setSelectedModality] = useState('')
   const [selectedSkill, setSelectedSkill] = useState('')
   const [selectedTrust, setSelectedTrust] = useState('')
+  const [selectedCountry, setSelectedCountry] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
 
   const filteredJobs = useMemo(() => {
     return jobs
@@ -66,12 +70,17 @@ function JobList({
         const matchesTrust =
           selectedTrust === '' || trust.level === selectedTrust
 
+        const matchesCountry =
+        selectedCountry === '' ||
+        job.location.toLowerCase().includes(selectedCountry.toLowerCase())
+
         return (
           matchesSearch &&
           matchesLevel &&
           matchesModality &&
           matchesSkill &&
-          matchesTrust
+          matchesTrust &&
+          matchesCountry
         )
       })
       .sort((a, b) => {
@@ -88,7 +97,21 @@ function JobList({
     selectedModality,
     selectedSkill,
     selectedTrust,
+    selectedCountry,
   ])
+
+  const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE)
+
+  const paginatedJobs = filteredJobs.slice(
+    (currentPage - 1) * JOBS_PER_PAGE,
+    currentPage * JOBS_PER_PAGE,
+  )
+
+  const startResult =
+    filteredJobs.length === 0 ? 0 : (currentPage - 1) * JOBS_PER_PAGE + 1
+
+  const endResult = Math.min(currentPage * JOBS_PER_PAGE, filteredJobs.length)
+
 
   const handleClearFilters = () => {
     setSearchTerm('')
@@ -96,9 +119,50 @@ function JobList({
     setSelectedModality('')
     setSelectedSkill('')
     setSelectedTrust('')
+    setSelectedCountry('')
+    setCurrentPage(1)
+  }
+
+  const handlePreviousPage = () => {
+    setCurrentPage((currentValue) => Math.max(currentValue - 1, 1))
+  }
+
+  const handleNextPage = () => {
+    setCurrentPage((currentValue) => Math.min(currentValue + 1, totalPages))
   }
 
   const savedJobIds = savedJobs.map((job) => job.id)
+
+  const handleSearchChange = (value: string) => {
+  setSearchTerm(value)
+  setCurrentPage(1)
+}
+
+const handleLevelChange = (value: string) => {
+  setSelectedLevel(value)
+  setCurrentPage(1)
+}
+
+const handleModalityChange = (value: string) => {
+  setSelectedModality(value)
+  setCurrentPage(1)
+}
+
+const handleSkillChange = (value: string) => {
+  setSelectedSkill(value)
+  setCurrentPage(1)
+}
+
+const handleTrustChange = (value: string) => {
+  setSelectedTrust(value)
+  setCurrentPage(1)
+}
+
+const handleCountryChange = (value: string) => {
+  setSelectedCountry(value)
+  setCurrentPage(1)
+}
+
 
   return (
     <section id="jobs" className="mx-auto max-w-7xl px-6 py-10">
@@ -134,12 +198,14 @@ function JobList({
         selectedModality={selectedModality}
         selectedSkill={selectedSkill}
         selectedTrust={selectedTrust}
-        onSearchChange={setSearchTerm}
-        onLevelChange={setSelectedLevel}
-        onModalityChange={setSelectedModality}
-        onSkillChange={setSelectedSkill}
-        onTrustChange={setSelectedTrust}
+        onSearchChange={handleSearchChange}
+        onLevelChange={handleLevelChange}
+        onModalityChange={handleModalityChange}
+        onSkillChange={handleSkillChange}
+        onTrustChange={handleTrustChange}
         onClearFilters={handleClearFilters}
+        selectedCountry={selectedCountry}
+        onCountryChange={handleCountryChange}
       />
 
       {isLoading && (
@@ -217,23 +283,94 @@ function JobList({
               </button>
             </div>
           ) : (
-            <div className="grid gap-6">
-              {filteredJobs.map((job) => {
-                const isSaved = savedJobs.some(
-                  (savedJob) => savedJob.id === job.id,
-                )
+            <>
+              <div className="mb-4 flex flex-col justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 px-5 py-4 sm:flex-row sm:items-center">
+                <p className="text-sm text-slate-400">
+                  Mostrando{' '}
+                  <span className="font-semibold text-white">
+                    {startResult}-{endResult}
+                  </span>{' '}
+                  de{' '}
+                  <span className="font-semibold text-white">
+                    {filteredJobs.length}
+                  </span>{' '}
+                  oportunidades
+                </p>
 
-                return (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                    userSkills={userSkills}
-                    isSaved={isSaved}
-                    onSaveJob={onSaveJob}
-                  />
-                )
-              })}
-            </div>
+                <p className="text-sm text-slate-500">
+                  Página {currentPage} de {totalPages}
+                </p>
+              </div>
+
+              <div className="grid gap-6">
+                {paginatedJobs.map((job) => {
+                  const isSaved = savedJobs.some(
+                    (savedJob) => savedJob.id === job.id,
+                  )
+
+                  return (
+                    <JobCard
+                      key={job.id}
+                      job={job}
+                      userSkills={userSkills}
+                      isSaved={isSaved}
+                      onSaveJob={onSaveJob}
+                    />
+                  )
+                })}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
+                    className={`rounded-xl px-5 py-2 text-sm font-semibold transition ${
+                      currentPage === 1
+                        ? 'cursor-not-allowed border border-slate-800 text-slate-600'
+                        : 'border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    Anterior
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: totalPages }).map((_, index) => {
+                      const pageNumber = index + 1
+
+                      return (
+                        <button
+                          key={pageNumber}
+                          type="button"
+                          onClick={() => setCurrentPage(pageNumber)}
+                          className={`h-9 w-9 rounded-xl text-sm font-semibold transition ${
+                            currentPage === pageNumber
+                              ? 'bg-blue-500 text-white'
+                              : 'border border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white'
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className={`rounded-xl px-5 py-2 text-sm font-semibold transition ${
+                      currentPage === totalPages
+                        ? 'cursor-not-allowed border border-slate-800 text-slate-600'
+                        : 'border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </>
       )}
